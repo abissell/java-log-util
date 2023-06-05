@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.abissell;
+package com.abissell.logutil;
 
-public record EventLog<S extends Enum<S> & LogDstSet<?>>(
-        LogBuf<S> buf
-) implements AutoCloseable {
-    public OptBuf to(S dstSet, Log log) {
-        return buf.to(dstSet, log);
-    }
+import java.util.EnumSet;
 
-    @Override
-    public void close() {
-        buf.flush();
-    }
+public interface LogDstSet<D extends Enum<D> & LogDst> {
+    EnumSet<D> set();
 }
