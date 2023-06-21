@@ -20,6 +20,10 @@ import java.util.EnumMap;
 public record LogBuf<S extends Enum<S> & LogDstSet<?>>(
         EnumMap<S, EnumMap<Log, OptBuf>> bufs
 ) {
+    public LogBuf(Class<S> clazz) {
+        this(new EnumMap<S, EnumMap<Log, OptBuf>>(clazz));
+    }
+
     public static <S extends Enum<S> & LogDstSet<?>>
     LogBuf<S> create(Class<S> clazz) {
         return new LogBuf<>(new EnumMap<>(clazz));
@@ -35,7 +39,7 @@ public record LogBuf<S extends Enum<S> & LogDstSet<?>>(
             if (log.isEnabled(dstSet)) {
                 return new OptBuf.Buf(new StringBuilder());
             } else {
-                return new OptBuf.Noop();
+                return OptBuf.NOOP;
             }
         });
     }

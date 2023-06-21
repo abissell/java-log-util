@@ -19,7 +19,46 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * An {@code OptBuf} is a text buffer which may or may not accumulate inputs
+ * into an underlying {@link java.lang.StringBuilder StringBuilder}, intended
+ * for use in asynchronous logging of event details at varying logging levels
+ * on performance-sensitive code paths. At runtime, if a sufficiently verbose
+ * level is enabled for a given log statement, an {@code OptBuf.Buf} can be
+ * used, which will append the statement to its internal buffer. Otherwise,
+ * {@code OptBuf.NOOP} can be used in its place, in which case the same method
+ * calls to add to the {@code OptBuf} are passed to a single statically
+ * allocated instance which simply returns itself after a no-op.
+ *
+ * <p> For example:
+ * <pre>{@code
+ * var optBuf;
+ * if (logger.isEnabled(Level.DEBUG)) {
+ *     optBuf = new OptBuf.Buf(new StringBuilder());
+ * } else {
+ *     optBuf = OptBuf.NOOP;
+ * }
+ *
+ * optBuf.add("some message").add(someObject).add("some trailing message");
+ * optBuf.add("another message, interleaved throughout business logic");
+ *
+ * if (optBuf instanceof OptBuf.Buf buf) {
+ *     logger.debug(buf.getAndClear());
+ * }
+ * }</pre>
+ *
+ * <p> This can be used to avoid interspersing conditional checks for logging
+ * levels in application code, and to accumulate messages to an in-memory
+ * buffer for later flushing to persistent storage. Shares some design goals
+ * with log4j2's {@code LogBuilder}. Used extensively in {@link com.abissell.logutil.LogBuf LogBuf},
+ * which provides an API for caching {@code OptBuf}s by different output destinations
+ * and logging levels.
+ *
+ * @author Andrew Bissell
+ */
+
 public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
+    OptBuf add(CharSequence chars);
     OptBuf add(String str);
     OptBuf add(Object obj);
     OptBuf add(Supplier<String> supplier);
@@ -27,6 +66,12 @@ public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
     int length();
 
     record Buf(StringBuilder buf) implements OptBuf {
+        @Override
+        public OptBuf add(CharSequence chars) {
+            buf.append(chars);
+            return this;
+        }
+
         @Override
         public OptBuf add(String str) {
             buf.append(str);
@@ -63,9 +108,10 @@ public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
 
     record Noop() implements OptBuf {
         @Override
-        public OptBuf add(String str) {
-            return this;
-        }
+        public OptBuf add(CharSequence chars) { return this; }
+
+        @Override
+        public OptBuf add(String str) { return this; }
 
         @Override
         public OptBuf add(Object obj) { return this; }
@@ -81,4 +127,6 @@ public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
             return 0;
         }
     }
+
+    static final Noop NOOP = new Noop();
 }
