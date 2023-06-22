@@ -35,52 +35,72 @@ import org.junit.jupiter.api.Test;
 public class EventLogTest {
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
+    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private final PrintStream originalErr = System.err;
 
     @BeforeEach
     public void setupStream() {
         System.setOut(new PrintStream(outContent));
+        System.setErr(new PrintStream(errContent));
+
+        var builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+
+        var appenderBuilder = builder.newAppender("Stdout", "CONSOLE")
+            .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+        appenderBuilder.add(builder.newLayout("PatternLayout")
+                .addAttribute("pattern", "%msg%n%throwable"));
+        builder.add(appenderBuilder);
+
+        builder.add(builder.newLogger("StdOut", Level.INFO)
+                .add(builder.newAppenderRef("Stdout"))
+                .addAttribute("additivity", false));
+
+        appenderBuilder = builder.newAppender("Stderr", "CONSOLE")
+            .addAttribute("target", ConsoleAppender.Target.SYSTEM_ERR);
+        appenderBuilder.add(builder.newLayout("PatternLayout")
+                .addAttribute("pattern", "%msg%n%throwable"));
+        builder.add(appenderBuilder);
+
+        builder.add(builder.newLogger("StdErr", Level.INFO)
+                .add(builder.newAppenderRef("Stderr"))
+                .addAttribute("additivity", false));
+
+        Configurator.initialize(builder.build());
     }
 
     @AfterEach
     public void teardown() {
         System.setOut(originalOut);
         outContent.reset();
+        System.setErr(originalErr);
+        errContent.reset();
     }
 
     @Test
     public void testLogBufFlush() {
         var logBuf = LogBuf.create(DstSet.class);
         try (var buf = new EventLog<>(logBuf)) {
-            buf.to(DstSet.FIRST, Log.ERROR).add("hello1").add("hello2");
+            buf.to(DstSet.OUT, Log.ERROR).add("hello1").add("hello2");
+            buf.to(DstSet.ERR, Log.ERROR).add("err1");
+            buf.to(DstSet.OUT_ERR, Log.ERROR).add("outerr");
         }
 
         try (var buf = new EventLog<>(logBuf)) {
-            buf.to(DstSet.FIRST, Log.ERROR).add("hello3");
+            buf.to(DstSet.OUT, Log.ERROR).add("hello3");
         }
 
-        assertEquals("hello1hello2\nhello3\n", outContent.toString());
+        assertEquals("hello1hello2\nouterr\nhello3\n", outContent.toString());
+        assertEquals("err1\nouterr\n", errContent.toString());
     }
 
     enum Dst implements LogDst {
-        FIRST;
+        OUT("StdOut"),
+        ERR("StdErr");
 
         private final Logger logger;
 
-        Dst() {
-            var builder = ConfigurationBuilderFactory.newConfigurationBuilder();
-            var appenderBuilder = builder.newAppender("Stdout", "CONSOLE")
-                    .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-            appenderBuilder.add(builder.newLayout("PatternLayout")
-                    .addAttribute("pattern", "%msg%n%throwable"));
-            builder.add(appenderBuilder);
-
-            builder.add(builder.newLogger("StdOut", Level.INFO)
-                    .add(builder.newAppenderRef("Stdout"))
-                    .addAttribute("additivity", false));
-
-            Configurator.initialize(builder.build());
-
-            this.logger = LogManager.getLogger("StdOut");
+        Dst(String loggerKey) {
+            this.logger = LogManager.getLogger(loggerKey);
         }
 
         @Override
@@ -90,7 +110,9 @@ public class EventLogTest {
     }
 
     enum DstSet implements LogDstSet<Dst> {
-        FIRST(Dst.FIRST);
+        OUT(Dst.OUT),
+        ERR(Dst.ERR),
+        OUT_ERR(Dst.OUT, Dst.ERR);
 
         private final EnumSet<Dst> set;
 
