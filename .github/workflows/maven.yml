@@ -15,10 +15,10 @@ jobs:
     environment: github-actions
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 19 and Maven Central Repository
+      - name: Set up JDK 21 and Maven Central Repository
         uses: actions/setup-java@v3
         with:
-          java-version: '19'
+          java-version: '21'
           distribution: 'temurin'
           server-id: ossrh
           server-username: MAVEN_USERNAME
