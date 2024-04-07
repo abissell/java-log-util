@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Andrew Bissell. All Rights Reserved.
+ * Copyright 2024 Andrew Bissell. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,15 +49,15 @@ import java.util.function.Supplier;
  *
  * <p> This can be used to avoid interspersing conditional checks for logging
  * levels in application code, and to accumulate messages to an in-memory
- * buffer for later flushing to persistent storage. Shares some design goals
- * with log4j2's {@code LogBuilder}. Used extensively in {@link com.abissell.logutil.LogBuf LogBuf},
- * which provides an API for caching {@code OptBuf}s by different output destinations
- * and logging levels.
+ * buffer for later flushing to persistent storage. Used extensively in
+ * {@link com.abissell.logutil.LogBuf LogBuf}, which provides an API for
+ * caching {@code OptBuf}s by different output destinations and logging levels.
  *
  * @author Andrew Bissell
  */
 
 public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
+
     OptBuf add(CharSequence chars);
     OptBuf add(String str);
     OptBuf add(Object obj);

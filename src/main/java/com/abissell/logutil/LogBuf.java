@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Andrew Bissell. All Rights Reserved.
+ * Copyright 2024 Andrew Bissell. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public record LogBuf<S extends Enum<S> & LogDstSet<?>>(
     void flush() {
         bufs.forEach((dstSet, logs) -> {
             logs.forEach((log, optBuf) -> {
-                if (optBuf instanceof (OptBuf.Buf buf)) {
+                if (optBuf instanceof OptBuf.Buf buf) {
                     if (buf.length() > 0) {
                         var str = buf.getAndClear();
                         dstSet.set().forEach(dst -> log.to(dst, str));
