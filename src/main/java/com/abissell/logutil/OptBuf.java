@@ -58,6 +58,14 @@ import java.util.function.Supplier;
 
 public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
 
+    OptBuf add(boolean b);
+    OptBuf add(byte b);
+    OptBuf add(char c);
+    OptBuf add(short s);
+    OptBuf add(int i);
+    OptBuf add(long el);
+    OptBuf add(float f);
+    OptBuf add(double d);
     OptBuf add(CharSequence chars);
     OptBuf add(String str);
     OptBuf add(Object obj);
@@ -66,6 +74,54 @@ public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
     int length();
 
     record Buf(StringBuilder buf) implements OptBuf {
+        @Override
+        public OptBuf add(boolean b) {
+            buf.append(b);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(byte b) {
+            buf.append(b);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(char c) {
+            buf.append(c);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(short s) {
+            buf.append(s);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(int i) {
+            buf.append(i);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(long el) {
+            buf.append(el);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(float f) {
+            buf.append(f);
+            return this;
+        }
+
+        @Override
+        public OptBuf add(double d) {
+            buf.append(d);
+            return this;
+        }
+
         @Override
         public OptBuf add(CharSequence chars) {
             buf.append(chars);
@@ -101,12 +157,36 @@ public sealed interface OptBuf permits OptBuf.Buf, OptBuf.Noop {
 
         public String getAndClear() {
             var str = buf.toString();
-            buf.delete(0, buf.length());
+            buf.setLength(0);
             return str;
         }
     }
 
     record Noop() implements OptBuf {
+        @Override
+        public OptBuf add(boolean b) { return this; }
+
+        @Override
+        public OptBuf add(byte b) { return this; }
+
+        @Override
+        public OptBuf add(char c) { return this; }
+
+        @Override
+        public OptBuf add(short s) { return this; }
+
+        @Override
+        public OptBuf add(int i) { return this; }
+
+        @Override
+        public OptBuf add(long el) { return this; }
+
+        @Override
+        public OptBuf add(float f) { return this; }
+
+        @Override
+        public OptBuf add(double d) { return this; }
+
         @Override
         public OptBuf add(CharSequence chars) { return this; }
 
