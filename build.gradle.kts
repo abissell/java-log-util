@@ -4,6 +4,7 @@ import com.vanniktech.maven.publish.SourcesJar
 
 plugins {
     `java-library`
+    id("org.gradlex.extra-java-module-info") version "1.14"
     id("com.vanniktech.maven.publish") version "0.36.0"
 }
 
@@ -18,6 +19,7 @@ group = "com.abissell"
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
@@ -29,6 +31,26 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+extraJavaModuleInfo {
+    failOnAutomaticModules = true
+    module("biz.aQute.bnd.annotation-7.1.0.jar", "biz.aQute.bnd.annotation")
+    module("org.osgi.annotation.bundle-2.0.0.jar", "org.osgi.annotation.bundle")
+    module("org.osgi.resource-1.0.0.jar", "org.osgi.resource")
+    module("org.osgi.service.serviceloader-1.0.0.jar", "org.osgi.service.serviceloader")
+    module("org.osgi.annotation.versioning-1.1.2.jar", "org.osgi.annotation.versioning")
+    module("chronicle-core-2026.3.jar", "chronicle.core")
+    module("posix-2026.2.jar", "net.openhft.posix")
+    module("chronicle-analytics-2026.2.jar", "chronicle.analytics")
+    module("jna-platform-5.5.0.jar", "com.sun.jna.platform")
+    module("jna-5.5.0.jar", "com.sun.jna")
+    module("jnr-ffi-2.2.15.jar", "org.jnrproject.ffi")
+    module("jnr-constants-0.10.4.jar", "org.jnrproject.constants")
+    module("jffi-1.3.12.jar", "org.jnrproject.jffi")
+    module("jffi-1.3.12-native.jar", "org.jnrproject.jffi.nativelibs")
+    module("jnr-a64asm-1.0.0.jar", "jnr.a64asm")
+    module("jnr-x86asm-1.0.2.jar", "jnr.x86asm")
 }
 
 tasks.withType<JavaCompile>().configureEach {
