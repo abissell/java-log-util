@@ -14,7 +14,7 @@ java {
     }
 }
 
-version = "0.7.0"
+version = "0.8.0"
 group = "com.abissell"
 
 repositories {
@@ -71,7 +71,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("com.abissell.logutil", "logutil", version.toString())
+    coordinates("com.abissell", "logutil", version.toString())
 
     pom {
         name.set("java-log-util")
