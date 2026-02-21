@@ -22,6 +22,14 @@ repositories {
     gradlePluginPortal()
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.javaModuleVersion = provider { version.toString() }
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation("com.abissell.javautil:javautil:0.11.0")
     api(platform("org.apache.logging.log4j:log4j-bom:2.25.3"))
@@ -51,14 +59,6 @@ extraJavaModuleInfo {
     module("jffi-1.3.12-native.jar", "org.jnrproject.jffi.nativelibs")
     module("jnr-a64asm-1.0.0.jar", "jnr.a64asm")
     module("jnr-x86asm-1.0.2.jar", "jnr.x86asm")
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.javaModuleVersion = provider { version.toString() }
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 mavenPublishing {
