@@ -14,7 +14,7 @@ java {
     }
 }
 
-version = "0.8.0"
+version = "0.9.0"
 group = "com.abissell"
 
 repositories {
@@ -31,7 +31,7 @@ tasks.test {
 }
 
 dependencies {
-    implementation("com.abissell.javautil:javautil:0.11.0")
+    implementation("com.abissell:javautil:0.12.0")
     api(platform("org.apache.logging.log4j:log4j-bom:2.25.3"))
     api("org.apache.logging.log4j:log4j-api")
     api("org.apache.logging.log4j:log4j-core")
