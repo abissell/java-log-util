@@ -31,7 +31,7 @@ tasks.test {
 }
 
 dependencies {
-    implementation("com.abissell:javautil:0.12.0")
+    implementation("com.abissell:javautil:0.13.0")
     api(platform("org.apache.logging.log4j:log4j-bom:2.25.3"))
     api("org.apache.logging.log4j:log4j-api")
     api("org.apache.logging.log4j:log4j-core")
@@ -48,17 +48,6 @@ extraJavaModuleInfo {
     module("org.osgi.resource-1.0.0.jar", "org.osgi.resource")
     module("org.osgi.service.serviceloader-1.0.0.jar", "org.osgi.service.serviceloader")
     module("org.osgi.annotation.versioning-1.1.2.jar", "org.osgi.annotation.versioning")
-    module("chronicle-core-2026.3.jar", "chronicle.core")
-    module("posix-2026.2.jar", "net.openhft.posix")
-    module("chronicle-analytics-2026.2.jar", "chronicle.analytics")
-    module("jna-platform-5.5.0.jar", "com.sun.jna.platform")
-    module("jna-5.5.0.jar", "com.sun.jna")
-    module("jnr-ffi-2.2.15.jar", "org.jnrproject.ffi")
-    module("jnr-constants-0.10.4.jar", "org.jnrproject.constants")
-    module("jffi-1.3.12.jar", "org.jnrproject.jffi")
-    module("jffi-1.3.12-native.jar", "org.jnrproject.jffi.nativelibs")
-    module("jnr-a64asm-1.0.0.jar", "jnr.a64asm")
-    module("jnr-x86asm-1.0.2.jar", "jnr.x86asm")
 }
 
 mavenPublishing {
