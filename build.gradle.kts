@@ -14,7 +14,7 @@ java {
     }
 }
 
-version = "0.10.0"
+version = "0.11.0"
 group = "com.abissell"
 
 repositories {
@@ -30,6 +30,12 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.test {
     useJUnitPlatform()
     jvmArgs("--enable-preview")
+}
+
+tasks.withType<Javadoc>().configureEach {
+    val javadocTool = options as CoreJavadocOptions
+    javadocTool.addBooleanOption("-enable-preview", true)
+    javadocTool.addStringOption("source", "25")
 }
 
 dependencies {
