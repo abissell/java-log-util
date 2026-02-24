@@ -17,6 +17,8 @@
 package com.abissell.logutil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -33,6 +35,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class EventLogTest {
+    static { Log.setLevel(Level.INFO); }
+
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -91,6 +95,20 @@ public class EventLogTest {
 
         assertEquals("hello1hello2\nouterr\nhello3\n", outContent.toString());
         assertEquals("err1\nouterr\n", errContent.toString());
+
+        assertTrue(Log.INFO.isEnabled());
+        outContent.reset();
+        try (var buf = new EventLog<>(logBuf)) {
+            buf.to(DstSet.OUT, Log.INFO).add("info-msg");
+        }
+        assertEquals("info-msg\n", outContent.toString());
+
+        assertFalse(Log.DEBUG.isEnabled());
+        outContent.reset();
+        try (var buf = new EventLog<>(logBuf)) {
+            buf.to(DstSet.OUT, Log.DEBUG).add("debug-msg");
+        }
+        assertEquals("", outContent.toString());
     }
 
     enum Dst implements LogDst {

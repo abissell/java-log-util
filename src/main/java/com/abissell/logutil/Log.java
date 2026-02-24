@@ -15,6 +15,7 @@
  */
 package com.abissell.logutil;
 
+import java.lang.StableValue;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -88,39 +89,30 @@ public enum Log {
         }
     };
 
+    private static final StableValue<Level> CONFIGURED_LEVEL = StableValue.of();
+
+    public static void setLevel(Level level) {
+        CONFIGURED_LEVEL.setOrThrow(level);
+    }
+
     abstract void toLogger(Logger logger, String msg);
     abstract void toLogger(Logger logger, String msg, Throwable throwable);
 
     public void to(LogDst dst, String msg) {
         var log = dst.getLogger();
-        if (isEnabled(log)) {
+        if (isEnabled()) {
             toLogger(log, msg);
         }
     }
 
     public void to(LogDst dst, String prefix, String msg) {
-        if (isEnabled(dst)) {
+        if (isEnabled()) {
             to(dst, prefix + msg);
         }
     }
 
-    public final boolean isEnabled(Logger logger) {
-        return logger.isEnabled(level);
-    }
-
-    public boolean isEnabled(LogDst dst) {
-        return isEnabled(dst.getLogger());
-    }
-
-    public boolean isEnabled(LogDstSet<?> dstSet) {
-        for (LogDst dst : dstSet.set()) {
-            var logger = dst.getLogger();
-            if (isEnabled(logger)) {
-                return true;
-            }
-        }
-
-        return false;
+    public final boolean isEnabled() {
+        return level.intLevel() <= CONFIGURED_LEVEL.orElseThrow().intLevel();
     }
 
     private final Level level;
@@ -130,20 +122,20 @@ public enum Log {
     }
 
     public void to(LogDstSet<?> dstSet, String prefix, String msg) {
-        if (isEnabled(dstSet)) {
+        if (isEnabled()) {
             var fullMsg = prefix + msg;
             to(dstSet, fullMsg);
         }
     }
 
     public void to(LogDstSet<?> dstSet, String prefix, Object obj) {
-        if (isEnabled(dstSet)) {
+        if (isEnabled()) {
             to(dstSet, prefix, obj.toString());
         }
     }
 
     public void to(LogDstSet<?> dstSet, String prefix, Supplier<String> msgSupplier) {
-        if (isEnabled(dstSet)) {
+        if (isEnabled()) {
             to(dstSet, prefix, msgSupplier.get());
         }
     }
@@ -153,13 +145,13 @@ public enum Log {
     }
 
     public void to(LogDstSet<?> dstSet, Object obj) {
-        if (isEnabled(dstSet)) {
+        if (isEnabled()) {
             to(dstSet, obj.toString());
         }
     }
 
     public void to(LogDstSet<?> dstSet, String msg) {
-        if (isEnabled(dstSet)) {
+        if (isEnabled()) {
             dstSet.set().forEach(dst -> to(dst, msg));
         }
     }

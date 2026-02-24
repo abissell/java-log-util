@@ -24,10 +24,12 @@ repositories {
 
 tasks.withType<JavaCompile>().configureEach {
     options.javaModuleVersion = provider { version.toString() }
+    options.compilerArgs.add("--enable-preview")
 }
 
 tasks.test {
     useJUnitPlatform()
+    jvmArgs("--enable-preview")
 }
 
 dependencies {

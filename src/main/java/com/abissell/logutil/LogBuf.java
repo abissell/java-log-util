@@ -36,7 +36,7 @@ public record LogBuf<S extends Enum<S> & LogDstSet<?>>(
     private OptBuf getBuf(S dstSet, Log log) {
         var bufsByLevel = bufs.computeIfAbsent(dstSet, s -> new EnumMap<>(Log.class));
         return bufsByLevel.computeIfAbsent(log, l -> {
-            if (log.isEnabled(dstSet)) {
+            if (log.isEnabled()) {
                 return new OptBuf.Buf(new StringBuilder());
             } else {
                 return OptBuf.NOOP;
