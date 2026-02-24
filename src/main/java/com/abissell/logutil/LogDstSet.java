@@ -15,8 +15,6 @@
  */
 package com.abissell.logutil;
 
-import java.util.EnumSet;
-
 public interface LogDstSet<D extends Enum<D> & LogDst> {
-    EnumSet<D> set();
+    D[] set();
 }

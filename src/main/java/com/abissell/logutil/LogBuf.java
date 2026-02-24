@@ -18,15 +18,23 @@ package com.abissell.logutil;
 import java.util.EnumMap;
 
 public record LogBuf<S extends Enum<S> & LogDstSet<?>>(
-        EnumMap<S, EnumMap<Log, OptBuf>> bufs
+        EnumMap<Log, OptBuf>[] bufs, S[] allSets
 ) {
-    public LogBuf(Class<S> clazz) {
-        this(new EnumMap<S, EnumMap<Log, OptBuf>>(clazz));
-    }
-
     public static <S extends Enum<S> & LogDstSet<?>>
-    LogBuf<S> create(Class<S> clazz) {
-        return new LogBuf<>(new EnumMap<>(clazz));
+    LogBuf<S> create(S[] allSets) {
+        @SuppressWarnings("unchecked")
+        EnumMap<Log, OptBuf>[] bufs = (EnumMap<Log, OptBuf>[]) new EnumMap[allSets.length];
+        for (S set : allSets) {
+            bufs[set.ordinal()] = new EnumMap<>(Log.class);
+            for (Log log : Log.values()) {
+                if (log.isEnabled()) {
+                    bufs[set.ordinal()].put(log, new OptBuf.Buf(new StringBuilder()));
+                } else {
+                    bufs[set.ordinal()].put(log, OptBuf.NOOP);
+                }
+            }
+        }
+        return new LogBuf<>(bufs, allSets);
     }
 
     public OptBuf to(S dstSet, Log log) {
@@ -34,26 +42,20 @@ public record LogBuf<S extends Enum<S> & LogDstSet<?>>(
     }
 
     private OptBuf getBuf(S dstSet, Log log) {
-        var bufsByLevel = bufs.computeIfAbsent(dstSet, s -> new EnumMap<>(Log.class));
-        return bufsByLevel.computeIfAbsent(log, l -> {
-            if (log.isEnabled()) {
-                return new OptBuf.Buf(new StringBuilder());
-            } else {
-                return OptBuf.NOOP;
-            }
-        });
+        return bufs[dstSet.ordinal()].get(log);
     }
 
     void flush() {
-        bufs.forEach((dstSet, logs) -> {
-            logs.forEach((log, optBuf) -> {
-                if (optBuf instanceof OptBuf.Buf buf) {
-                    if (buf.length() > 0) {
-                        var str = buf.getAndClear();
-                        dstSet.set().forEach(dst -> log.to(dst, str));
+        for (S dstSet : allSets) {
+            for (Log log : Log.ENABLED_LEVELS.orElseThrow()) {
+                OptBuf.Buf buf = (OptBuf.Buf) bufs[dstSet.ordinal()].get(log);
+                if (buf.length() > 0) {
+                    var str = buf.getAndClear();
+                    for (LogDst dst : dstSet.set()) {
+                        log.to(dst, str);
                     }
                 }
-            });
-        });
+            }
+        }
     }
 }

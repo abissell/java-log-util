@@ -82,7 +82,7 @@ public class EventLogTest {
 
     @Test
     public void testLogBufFlush() {
-        var logBuf = LogBuf.create(DstSet.class);
+        var logBuf = LogBuf.create(DstSet.values());
         try (var buf = new EventLog<>(logBuf)) {
             buf.to(DstSet.OUT, Log.ERROR).add("hello1").add("hello2");
             buf.to(DstSet.ERR, Log.ERROR).add("err1");
@@ -132,14 +132,14 @@ public class EventLogTest {
         ERR(Dst.ERR),
         OUT_ERR(Dst.OUT, Dst.ERR);
 
-        private final EnumSet<Dst> set;
+        private final Dst[] set;
 
         DstSet(Dst... dsts) {
-            this.set = EnumSet.of(dsts[0], dsts);
+            this.set = dsts;
         }
 
         @Override
-        public EnumSet<Dst> set() {
+        public Dst[] set() {
             return set;
         }
     }

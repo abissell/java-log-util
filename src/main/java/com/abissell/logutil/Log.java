@@ -90,9 +90,25 @@ public enum Log {
     };
 
     private static final StableValue<Level> CONFIGURED_LEVEL = StableValue.of();
+    static final StableValue<Log[]> ENABLED_LEVELS = StableValue.of();
 
     public static void setLevel(Level level) {
         CONFIGURED_LEVEL.setOrThrow(level);
+
+        int enabledCount = 0;
+        for (Log logLevel : values()) {
+            if (logLevel.isEnabled()) {
+                enabledCount++;
+            }
+        }
+        Log[] enabledLevels = new Log[enabledCount];
+        int i = 0;
+        for (Log logLevel : values()) {
+            if (logLevel.isEnabled()) {
+                enabledLevels[i++] = logLevel;
+            }
+        }
+        ENABLED_LEVELS.setOrThrow(enabledLevels);
     }
 
     abstract void toLogger(Logger logger, String msg);
@@ -152,7 +168,9 @@ public enum Log {
 
     public void to(LogDstSet<?> dstSet, String msg) {
         if (isEnabled()) {
-            dstSet.set().forEach(dst -> to(dst, msg));
+            for (LogDst dst : dstSet.set()) {
+                to(dst, msg);
+            }
         }
     }
 }
